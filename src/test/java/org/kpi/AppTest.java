@@ -1,4 +1,4 @@
-package org.training;
+package org.kpi;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

@@ -1,4 +1,4 @@
-package org.training.entity;
+package org.kpi.entity;
 
 public class Order {
   private Long id;

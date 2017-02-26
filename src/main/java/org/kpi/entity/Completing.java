@@ -1,4 +1,4 @@
-package org.training.entity;
+package org.kpi.entity;
 
 public class Completing {
   private Long id;

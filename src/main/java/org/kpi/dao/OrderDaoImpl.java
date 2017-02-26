@@ -1,13 +1,10 @@
-package org.training.dao;
+package org.kpi.dao;
 
-import org.training.entity.Dealer;
-import org.training.entity.Order;
-import org.training.entity.Sofa;
+import org.kpi.entity.Dealer;
+import org.kpi.entity.Order;
+import org.kpi.entity.Sofa;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +13,16 @@ public class OrderDaoImpl implements OrderDAO {
 
     private final String SELECT_ALL = "select * from furniture.order " +
             "join dealer on furniture.order.Dealer_idDealer = dealer.idDealer";
+
+    private final String DELETE_BY_ID = "DELETE from furniture.order " +
+            "where idOrder = ?";
+
+    private final String CREATE = "INSERT INTO `furniture`.`order`\n" +
+            "(`Order Date`,\n" +
+            "`Execution Date`,\n" +
+            "`Cost`,\n" +
+            "`Dealer_idDealer`)\n" +
+            " VALUES (?,?,?,?) ";
 
     private Connection connection;
 
@@ -55,11 +62,29 @@ public class OrderDaoImpl implements OrderDAO {
     }
 
 
-    public Sofa getById(Long id) {
+    public Order getById(Long id) {
         return null;
     }
 
-    public void create(Sofa sofa) {
+    public void create(Order order) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(CREATE)) {
+            preparedStatement.setDate(1, order.getOrderDate());
+            preparedStatement.setDate(2, order.getExecutionDate());
+            preparedStatement.setDouble(3, order.getCost());
+            preparedStatement.setLong(4, order.getDealer().getId());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
+    @Override
+    public void deleteById(Long id) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_BY_ID)) {
+            preparedStatement.setLong(1,id);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
