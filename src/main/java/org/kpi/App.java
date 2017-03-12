@@ -18,33 +18,24 @@ public class App
 {
     public static void main( String[] args )
     {
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/furniture", // change to your database name
-                   "root", //change to your connection username
-                    "root"); //same for password
-            OrderDAO orderDao = new OrderDaoImpl(conn);
+            OrderDaoImpl orderDao = new OrderDaoImpl();
+            orderDao.openCurrentSessionwithTransaction();
             System.out.println(orderDao.getAll());
+            //Order order = createOrder();
+           // orderDao.create(order);
+            orderDao.closeCurrentSessionwithTransaction();
 
-            Order order = createOrder();
-            orderDao.create(order);
-
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     private static Order createOrder() {
         Order order = new Order();
         java.util.Date now = new java.util.Date();
         order.setOrderDate(new Date(now.getTime()));
-        order.setCost(200.0);
-        order.setExecutionDate(new Date(now.getTime() + 1000));
+        order.setCost(800.0);
+        order.setExecutionDate(new Date(now.getTime()));
         Dealer dealer = new Dealer();
-        dealer.setId((long) 1);
-        dealer.setCurrentAccount((long) 123124);
+        dealer.setId(1);
+        dealer.setCurrentAccount(123124);
         dealer.setTitle("dealertitle1");
         order.setDealer(dealer);
         return order;

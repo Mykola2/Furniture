@@ -1,7 +1,6 @@
 package org.kpi.dao;
 
 import org.kpi.entity.Order;
-import org.kpi.entity.Sofa;
 
 import java.util.List;
 
@@ -10,12 +9,12 @@ import java.util.List;
  */
 public interface OrderDAO {
 
-    List<Order> getAll();
+    List getAll();
 
     Order getById(Long id);
 
     void create(Order order);
 
-    void deleteById(Long id);
+    void delete(Order id);
 
 }

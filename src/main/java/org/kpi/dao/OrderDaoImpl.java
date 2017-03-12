@@ -1,5 +1,10 @@
 package org.kpi.dao;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
 import org.kpi.entity.Dealer;
 import org.kpi.entity.Order;
 import org.kpi.entity.Sofa;
@@ -11,80 +16,71 @@ import java.util.List;
 
 public class OrderDaoImpl implements OrderDAO {
 
-    private final String SELECT_ALL = "select * from furniture.order " +
-            "join dealer on furniture.order.Dealer_idDealer = dealer.idDealer";
+    private Session currentSession;
 
-    private final String DELETE_BY_ID = "DELETE from furniture.order " +
-            "where idOrder = ?";
+    private Transaction currentTransaction;
 
-    private final String CREATE = "INSERT INTO `furniture`.`order`\n" +
-            "(`Order Date`,\n" +
-            "`Execution Date`,\n" +
-            "`Cost`,\n" +
-            "`Dealer_idDealer`)\n" +
-            " VALUES (?,?,?,?) ";
-
-    private Connection connection;
-
-    public OrderDaoImpl(Connection connection) {
-        this.connection = connection;
+    public Session openCurrentSession() {
+        currentSession = getSessionFactory().openSession();
+        return currentSession;
     }
+
+    public Session openCurrentSessionwithTransaction() {
+        currentSession = getSessionFactory().openSession();
+        currentTransaction = currentSession.beginTransaction();
+        return currentSession;
+    }
+
+    public void closeCurrentSession() {
+        currentSession.close();
+    }
+
+    public void closeCurrentSessionwithTransaction() {
+        currentTransaction.commit();
+        currentSession.close();
+    }
+
+    private static SessionFactory getSessionFactory() {
+        Configuration configuration = new Configuration().configure();
+        StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder()
+                .applySettings(configuration.getProperties());
+        SessionFactory sessionFactory = configuration.buildSessionFactory(builder.build());
+        return sessionFactory;
+    }
+
+    public Session getCurrentSession() {
+        return currentSession;
+    }
+
+    public void setCurrentSession(Session currentSession) {
+        this.currentSession = currentSession;
+    }
+
+    public Transaction getCurrentTransaction() {
+        return currentTransaction;
+    }
+
+    public void setCurrentTransaction(Transaction currentTransaction) {
+        this.currentTransaction = currentTransaction;
+    }
+
 
     public List<Order> getAll() {
-        List<Order> orders = new ArrayList<>();
-        try (PreparedStatement statement = connection.prepareStatement(SELECT_ALL)) {
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                Order order = new Order();
-                order.setId(resultSet.getLong("idOrder"));
-                order.setOrderDate(resultSet.getDate("Order Date"));
-                order.setExecutionDate(resultSet.getDate("Execution Date"));
-                order.setCost(resultSet.getDouble("Cost"));
-                Dealer dealer = getDealer(resultSet);
-                order.setDealer(dealer);
-                orders.add(order);
-            }
-            return orders;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    private Dealer getDealer(ResultSet resultSet) throws SQLException {
-        Dealer dealer = new Dealer();
-        dealer.setId(resultSet.getLong("idDealer"));
-        dealer.setAddress(resultSet.getString("Address"));
-        dealer.setTitle(resultSet.getString("Title"));
-        dealer.setCurrentAccount(resultSet.getLong("Current Account"));
-        dealer.setPhone(resultSet.getString("Phone"));
-        return dealer;
+        return getCurrentSession().createCriteria(Order.class).list();
     }
 
 
     public Order getById(Long id) {
-        return null;
-    }
-
-    public void create(Order order) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(CREATE)) {
-            preparedStatement.setDate(1, order.getOrderDate());
-            preparedStatement.setDate(2, order.getExecutionDate());
-            preparedStatement.setDouble(3, order.getCost());
-            preparedStatement.setLong(4, order.getDealer().getId());
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        return (Order) getCurrentSession().get(Order.class, id);
     }
 
     @Override
-    public void deleteById(Long id) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_BY_ID)) {
-            preparedStatement.setLong(1,id);
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public void create(Order order) {
+        getCurrentSession().persist(order);
+    }
+
+    @Override
+    public void delete(Order order) {
+        getCurrentSession().delete(order);
     }
 }

@@ -1,17 +1,31 @@
 package org.kpi.entity;
 
+import javax.persistence.*;
+
+@Entity
+@Table(name = "`order`")
 public class Order {
-  private Long id;
+  @Id
+  @GeneratedValue
+  @Column(name = "idOrder")
+  private Integer id;
+
   private java.sql.Date orderDate;
+
   private java.sql.Date executionDate;
+
+  @Column
   private Double cost;
+
+  @ManyToOne(fetch=FetchType.LAZY)
+  @JoinColumn(name="Dealer_idDealer")
   private Dealer dealer;
 
-  public Long getId() {
+  public Integer getId() {
     return id;
   }
 
-  public void setId(Long id) {
+  public void setId(Integer id) {
     this.id = id;
   }
 

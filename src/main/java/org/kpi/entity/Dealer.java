@@ -1,17 +1,33 @@
 package org.kpi.entity;
 
-public class Dealer {
-  private Long id;
-  private String title;
-  private String address;
-  private String phone;
-  private Long currentAccount;
+import javax.persistence.*;
 
-  public Long getId() {
+@Entity
+@Table(name = "dealer")
+public class Dealer {
+
+  @Column(name = "idDealer")
+  @Id
+  @GeneratedValue
+  private Integer id;
+
+  @Column
+  private String title;
+
+  @Column
+  private String address;
+
+  @Column
+  private String phone;
+
+  @Column(name = "currentAccount")
+  private Integer currentAccount;
+
+  public Integer getId() {
     return id;
   }
 
-  public void setId(Long id) {
+  public void setId(Integer id) {
     this.id = id;
   }
 
@@ -39,11 +55,11 @@ public class Dealer {
     this.phone = phone;
   }
 
-  public Long getCurrentAccount() {
+  public Integer getCurrentAccount() {
     return currentAccount;
   }
 
-  public void setCurrentAccount(Long currentAccount) {
+  public void setCurrentAccount(Integer currentAccount) {
     this.currentAccount = currentAccount;
   }
 }
