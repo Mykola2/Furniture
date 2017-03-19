@@ -9,6 +9,13 @@ import org.kpi.entity.Dealer;
 import org.kpi.entity.Order;
 import org.kpi.entity.Sofa;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,71 +23,32 @@ import java.util.List;
 
 public class OrderDaoImpl implements OrderDAO {
 
-    private Session currentSession;
+    EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "JPA" );
 
-    private Transaction currentTransaction;
-
-    public Session openCurrentSession() {
-        currentSession = getSessionFactory().openSession();
-        return currentSession;
-    }
-
-    public Session openCurrentSessionwithTransaction() {
-        currentSession = getSessionFactory().openSession();
-        currentTransaction = currentSession.beginTransaction();
-        return currentSession;
-    }
-
-    public void closeCurrentSession() {
-        currentSession.close();
-    }
-
-    public void closeCurrentSessionwithTransaction() {
-        currentTransaction.commit();
-        currentSession.close();
-    }
-
-    private static SessionFactory getSessionFactory() {
-        Configuration configuration = new Configuration().configure();
-        StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder()
-                .applySettings(configuration.getProperties());
-        SessionFactory sessionFactory = configuration.buildSessionFactory(builder.build());
-        return sessionFactory;
-    }
-
-    public Session getCurrentSession() {
-        return currentSession;
-    }
-
-    public void setCurrentSession(Session currentSession) {
-        this.currentSession = currentSession;
-    }
-
-    public Transaction getCurrentTransaction() {
-        return currentTransaction;
-    }
-
-    public void setCurrentTransaction(Transaction currentTransaction) {
-        this.currentTransaction = currentTransaction;
-    }
+    EntityManager em = emfactory.createEntityManager();
 
 
     public List<Order> getAll() {
-        return getCurrentSession().createCriteria(Order.class).list();
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Order> cq = cb.createQuery(Order.class);
+        Root<Order> rootEntry = cq.from(Order.class);
+        CriteriaQuery<Order> all = cq.select(rootEntry);
+        TypedQuery<Order> allQuery = em.createQuery(all);
+        return allQuery.getResultList();
     }
 
 
     public Order getById(Long id) {
-        return (Order) getCurrentSession().get(Order.class, id);
+        return em.find(Order.class,id);
     }
 
     @Override
     public void create(Order order) {
-        getCurrentSession().persist(order);
+        em.merge(order);
     }
 
     @Override
     public void delete(Order order) {
-        getCurrentSession().delete(order);
+       em.remove(order);
     }
 }

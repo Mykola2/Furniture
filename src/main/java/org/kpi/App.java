@@ -19,11 +19,11 @@ public class App
     public static void main( String[] args )
     {
             OrderDaoImpl orderDao = new OrderDaoImpl();
-            orderDao.openCurrentSessionwithTransaction();
+            //orderDao.openCurrentSessionwithTransaction();
             System.out.println(orderDao.getAll());
             //Order order = createOrder();
            // orderDao.create(order);
-            orderDao.closeCurrentSessionwithTransaction();
+           // orderDao.closeCurrentSessionwithTransaction();
 
     }
 
